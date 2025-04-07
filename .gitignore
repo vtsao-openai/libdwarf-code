@@ -49,3 +49,7 @@ autom4te.cache/
 test/*.log
 test/*.trs
 test/dwarfdump.conf
+
+# bazel
+MODULE.bazel.lock
+bazel-*

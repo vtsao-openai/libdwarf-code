@@ -1,0 +1,38 @@
+load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+expand_template(
+    name = "config_h",
+    out = "src/lib/libdwarf/config.h",
+    substitutions = {
+        # TODO
+        "#cmakedefine AC_APPLE_UNIVERSAL_BUILD": "#define AC_APPLE_UNIVERSAL_BUILD 0",
+    },
+    template = "cmake/config.h.in",
+)
+
+cc_library(
+    name = "dwarf",
+    srcs = glob(
+        [
+            "src/lib/libdwarf/*.c",
+            "src/lib/libdwarfp/*.c",
+        ] + [":config_h"],
+    ),
+    hdrs = glob(
+        [
+            "src/lib/libdwarf/*.h",
+            "src/lib/libdwarfp/*.h",
+        ],
+    ),
+    includes = [
+        "src/lib/libdwarf",
+        "src/lib/libdwarfp",
+    ],
+)
+
+alias(
+    name = "libdwarf",
+    actual = ":dwarf",
+    visibility = ["//visibility:public"],
+)
