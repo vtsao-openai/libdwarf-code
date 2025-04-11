@@ -1,5 +1,6 @@
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
-load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//:gen_test_targets.bzl", "gen_test_targets")
 
 expand_template(
     name = "config_h",
@@ -71,10 +72,35 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-cc_test(
-    name = "canonical_test",
-    srcs = ["test/test_canonical.c"],
-    deps = [
-        ":dwarf",
-    ],
+cc_library(
+    name = "dwarfdump",
+    # Testonly for now as this only exists for the tests to run. Ideally we also
+    # have a cc_binary for dwarfdump, since it's a binary, but we can add that
+    # if somebody actually needs it.
+    testonly = True,
+    srcs = glob(["src/bin/dwarfdump/*.c"]),
+    hdrs = glob(
+        [
+            "src/bin/dwarfdump/*.h",
+            "src/bin/dwarfdump/*.c",
+        ],
+    ),
+    includes = ["src/bin/dwarfdump"],
+    deps = [":dwarf"],
+)
+
+# Generates a good chunk of the C tests, which should be good enough to verify
+# this has been Bazelified correctly. There are some Python tests and some tests
+# that don't start with test_* that are not run.
+gen_test_targets(
+    name = "gen_dwarf_test_targets",
+    cc_srcs = glob(
+        ["test/test_*.c"],
+        exclude = [
+            # These tests require an env var to be set to the root of this lib.
+            # Probably not worth getting it to work.
+            "test/test_errmsglist.c",
+            "test/test_lname.c",
+        ],
+    ),
 )
