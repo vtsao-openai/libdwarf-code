@@ -61,6 +61,7 @@ cc_library(
         ],
     ),
     includes = [
+        "src/lib",
         "src/lib/libdwarf",
         "src/lib/libdwarfp",
     ],
